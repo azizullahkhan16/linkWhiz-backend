@@ -1,4 +1,4 @@
-package com.aktic.linkWhiz_backend.config;
+package com.aktic.linkWhiz_backend.filter;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -13,7 +13,7 @@ import java.io.IOException;
 @Component
 public class RequestLoggingFilter extends OncePerRequestFilter {
 
-    private static final Logger logger = LoggerFactory.getLogger(RequestLoggingFilter.class);
+    private static final Logger requestLogger = LoggerFactory.getLogger(RequestLoggingFilter.class);
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -27,7 +27,7 @@ public class RequestLoggingFilter extends OncePerRequestFilter {
             String uri = request.getRequestURI();
             int status = response.getStatus(); // Response status
 
-            logger.info("{} {} {} {}ms", method, uri, status, duration);
+            requestLogger.info("{} {} {} {}ms", method, uri, status, duration);
         }
     }
 
