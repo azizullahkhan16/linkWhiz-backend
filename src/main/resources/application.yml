@@ -1,9 +1,12 @@
 spring:
   application:
     name: linkWhiz-backend
-
+  jackson:
+    time-zone: UTC
+  profiles:
+    active: dev
   datasource:
-    url: jdbc:postgresql://${ENV:localhost}:5432/linkWhiz
+    url: 'jdbc:postgresql://${DB_HOST:localhost}:5432/LinkWhiz'
     username: ${DB_USER:postgres}
     password: ${DB_PASS:123456789}
     driver-class-name: org.postgresql.Driver
@@ -18,8 +21,9 @@ spring:
 server:
   port: ${PORT:8080}
   servlet:
-    context-path: ${BASE_PATH:/api}
+    context-path: ${BASE_PATH:/api/v1}
 
 logging:
   level:
     root: INFO
+
