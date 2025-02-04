@@ -13,7 +13,7 @@ import java.time.Instant;
 @NoArgsConstructor
 @Entity
 @Table(name = "analytics_urls")
-public class AnalyticsURL {
+public class AnalyticsUrl {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY) // Auto-generate ID
@@ -27,6 +27,6 @@ public class AnalyticsURL {
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "short_url_id", nullable = false)
-    private ShortURL shortURL;
+    private ShortUrl shortUrl;
 
 }

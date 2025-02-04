@@ -9,7 +9,13 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
 import java.time.Instant;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 @Data
@@ -18,7 +24,7 @@ import java.util.List;
 @Entity
 @Table(name = "users")
 @Builder
-public class User {
+public class User implements UserDetails {
     @Id
     @Column(name = "id", nullable = false, updatable = false, unique = true)
     private Long id;
@@ -63,7 +69,36 @@ public class User {
     private Role role;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ShortURL> shortURLs;
+    private List<ShortUrl> shortUrls;
 
 
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return Collections.singletonList(new SimpleGrantedAuthority(role.getRoleName()));
+    }
+
+    @Override
+    public String getUsername() {
+        return this.email;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
 }

@@ -16,16 +16,16 @@ import java.time.Instant;
 @Entity
 @Table(name = "short_urls")
 @Builder
-public class ShortURL {
+public class ShortUrl {
 
     @Id
     private Long id;
 
     @Column(name = "original_url", nullable = false)
-    private String originalURL;
+    private String originalUrl;
 
     @Column(name = "short_url", nullable = false)
-    private String shortURL;
+    private String shortUrl;
 
     @Column(name = "custom_alias", unique = true)
     private String customAlias;
@@ -48,7 +48,7 @@ public class ShortURL {
     @Column(name = "qr_code")
     private String qrCode;
 
-    @OneToOne(mappedBy = "shortURL", cascade = CascadeType.ALL, orphanRemoval = true)
-    private AnalyticsURL analyticsURL;
+    @OneToOne(mappedBy = "shortUrl", cascade = CascadeType.ALL, orphanRemoval = true)
+    private AnalyticsUrl analyticsUrl;
 
 }
