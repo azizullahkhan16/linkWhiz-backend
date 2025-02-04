@@ -1,6 +1,6 @@
 package com.aktic.linkWhiz_backend.repository;
 
-import com.aktic.linkWhiz_backend.model.User;
+import com.aktic.linkWhiz_backend.model.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

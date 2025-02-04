@@ -1,4 +1,4 @@
-package com.aktic.linkWhiz_backend.model;
+package com.aktic.linkWhiz_backend.model.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
