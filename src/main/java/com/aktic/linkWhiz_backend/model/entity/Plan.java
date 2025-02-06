@@ -1,15 +1,13 @@
 package com.aktic.linkWhiz_backend.model.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -21,6 +19,7 @@ import java.time.Instant;
 @Entity
 @Table(name = "plans")
 @Builder
+@EntityListeners(AuditingEntityListener.class)
 public class Plan {
 
     @Id
@@ -33,7 +32,7 @@ public class Plan {
     @Column(name = "description")
     private String description;
 
-    @Column(name = "max_links", nullable = false)
+    @Column(name = "max_links")
     private BigInteger maxLinks;
 
     @Column(name = "price", nullable = false, precision = 10, scale = 2)

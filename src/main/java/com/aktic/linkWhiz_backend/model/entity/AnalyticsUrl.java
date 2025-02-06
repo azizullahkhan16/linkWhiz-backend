@@ -16,10 +16,9 @@ import java.time.Instant;
 public class AnalyticsUrl {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // Auto-generate ID
     private Long id;
 
-    @Column(name = "clicks", nullable = false, columnDefinition = "BIGINT DEFAULT 0")
+    @Column(name = "clicks", nullable = false)
     private BigInteger clicks;
 
     @Column(name = "last_accessed_at", nullable = true)
@@ -28,5 +27,10 @@ public class AnalyticsUrl {
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "short_url_id", nullable = false)
     private ShortUrl shortUrl;
+
+    @PrePersist
+    public void prePersist() {
+        this.clicks = BigInteger.ZERO;
+    }
 
 }

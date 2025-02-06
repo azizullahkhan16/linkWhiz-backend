@@ -1,15 +1,13 @@
 package com.aktic.linkWhiz_backend.model.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.Instant;
 
@@ -19,6 +17,7 @@ import java.time.Instant;
 @Entity
 @Table(name = "roles")
 @Builder
+@EntityListeners(AuditingEntityListener.class)
 public class Role {
 
     @Id

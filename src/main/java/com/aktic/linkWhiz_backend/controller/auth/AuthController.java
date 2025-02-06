@@ -1,6 +1,8 @@
 package com.aktic.linkWhiz_backend.controller.auth;
 
+import com.aktic.linkWhiz_backend.model.request.AuthenticationRequest;
 import com.aktic.linkWhiz_backend.model.request.RegisterRequest;
+import com.aktic.linkWhiz_backend.model.response.AuthenticationResponse;
 import com.aktic.linkWhiz_backend.service.auth.AuthService;
 import com.aktic.linkWhiz_backend.util.ApiResponse;
 import jakarta.validation.Valid;
@@ -23,6 +25,13 @@ public class AuthController {
             @Valid @RequestBody RegisterRequest request
     ) {
         return service.register(request);
+    }
+
+    @PostMapping(value = "/login")
+    public ResponseEntity<ApiResponse<AuthenticationResponse>> login(
+            @Valid @RequestBody AuthenticationRequest request
+    ) {
+        return service.login(request);
     }
 
 }

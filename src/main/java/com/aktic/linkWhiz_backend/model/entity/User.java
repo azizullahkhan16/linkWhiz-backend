@@ -9,6 +9,7 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -24,6 +25,7 @@ import java.util.List;
 @Entity
 @Table(name = "users")
 @Builder
+@EntityListeners(AuditingEntityListener.class)
 public class User implements UserDetails {
     @Id
     @Column(name = "id", nullable = false, updatable = false, unique = true)
@@ -52,10 +54,10 @@ public class User implements UserDetails {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
-    @Column(name = "is_verified", nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
+    @Column(name = "is_verified", nullable = false)
     private Boolean isVerified;
 
-    @Column(name = "is_active", nullable = false, columnDefinition = "BOOLEAN DEFAULT true")
+    @Column(name = "is_active", nullable = false)
     private Boolean isActive;
 
     @ManyToOne
@@ -71,6 +73,11 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ShortUrl> shortUrls;
 
+    @PrePersist
+    public void prePersist() {
+        this.isVerified = this.isVerified != null && this.isVerified;
+        this.isActive = this.isActive == null || this.isActive;
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
