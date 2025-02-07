@@ -88,7 +88,6 @@ public class AuthService {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                         .body(new ApiResponse<>(false, "Invalid password", null));
             }
-
             String token = jwtService.generateToken(user);
             UserInfo userInfo = new UserInfo(user);
 
@@ -101,5 +100,4 @@ public class AuthService {
                     .body(new ApiResponse<>(false, "Internal server error", null));
         }
     }
-
 }

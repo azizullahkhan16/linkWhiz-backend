@@ -70,7 +70,7 @@ public class User implements UserDetails {
     @OnDelete(action = OnDeleteAction.SET_NULL)
     private Role role;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<ShortUrl> shortUrls;
 
     @PrePersist
@@ -81,7 +81,7 @@ public class User implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.singletonList(new SimpleGrantedAuthority(role.getRoleName()));
+        return Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role.getRoleName()));
     }
 
     @Override

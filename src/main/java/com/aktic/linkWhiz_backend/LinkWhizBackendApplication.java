@@ -2,8 +2,10 @@ package com.aktic.linkWhiz_backend;
 
 import com.aktic.linkWhiz_backend.repository.PlanRepository;
 import com.aktic.linkWhiz_backend.repository.RoleRepository;
+import com.aktic.linkWhiz_backend.service.fileStorage.FileStorageService;
 import com.aktic.linkWhiz_backend.util.SnowflakeIdGenerator;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
@@ -11,15 +13,22 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 @SpringBootApplication
 @EnableJpaAuditing
 @RequiredArgsConstructor
-public class LinkWhizBackendApplication {
+public class LinkWhizBackendApplication implements CommandLineRunner {
 
     private final SnowflakeIdGenerator snowflakeIdGenerator;
     private final PlanRepository planRepository;
     private final RoleRepository roleRepository;
+    private final FileStorageService storageService;
 
     public static void main(String[] args) {
         SpringApplication.run(LinkWhizBackendApplication.class, args);
 
+    }
+
+
+    @Override
+    public void run(String... arg) throws Exception {
+        storageService.init();
     }
 
 //    @Bean
