@@ -1,5 +1,6 @@
 package com.aktic.linkWhiz_backend.service.fileStorage;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
@@ -14,6 +15,7 @@ import java.nio.file.Paths;
 import java.util.stream.Stream;
 
 @Service
+@Slf4j
 public class FileStorageServiceImpl implements FileStorageService {
 
     private final Path root = Paths.get("uploads");
