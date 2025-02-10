@@ -13,4 +13,6 @@ public interface ShortUrlRepository extends JpaRepository<ShortUrl, Long> {
     boolean existsByCustomAlias(String customAlias);
 
     Optional<ShortUrl> findByShortUrl(String baseUrl);
+
+    Optional<ShortUrl> findByIdAndUserId(Long id, Long userId);
 }

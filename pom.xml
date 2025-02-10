@@ -30,6 +30,7 @@
         <java.version>21</java.version>
         <spring-jpa.version>3.4.1</spring-jpa.version>
         <jjwt.version>0.12.6</jjwt.version>
+        <zxing.version>3.5.2</zxing.version>
     </properties>
     <dependencies>
         <dependency>
@@ -84,6 +85,16 @@
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-jackson</artifactId>
             <version>${jjwt.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.zxing</groupId>
+            <artifactId>core</artifactId>
+            <version>${zxing.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.zxing</groupId>
+            <artifactId>javase</artifactId>
+            <version>${zxing.version}</version>
         </dependency>
     </dependencies>
 

@@ -1,6 +1,8 @@
 package com.aktic.linkWhiz_backend.service.redirect;
 
+import com.aktic.linkWhiz_backend.model.entity.AnalyticsUrl;
 import com.aktic.linkWhiz_backend.model.entity.ShortUrl;
+import com.aktic.linkWhiz_backend.repository.AnalyticsUrlRepository;
 import com.aktic.linkWhiz_backend.repository.ShortUrlRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -10,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.math.BigInteger;
 import java.time.Instant;
 import java.util.Optional;
 
@@ -18,6 +21,7 @@ import java.util.Optional;
 @Slf4j
 public class RedirectService {
     private final ShortUrlRepository shortUrlRepository;
+    private final AnalyticsUrlRepository analyticsUrlRepository;
 
     public ResponseEntity<Void> redirectToOriginalUrl(String alias) {
         try {
@@ -29,6 +33,12 @@ public class RedirectService {
             }
 
             ShortUrl shortUrl = shortUrlOptional.get();
+            AnalyticsUrl analyticsUrl = shortUrl.getAnalyticsUrl();
+            if (analyticsUrl != null) {
+                analyticsUrl.setClicks(analyticsUrl.getClicks().add(BigInteger.ONE));
+                analyticsUrl.setLastAccessedAt(Instant.now());
+                analyticsUrlRepository.save(analyticsUrl);
+            }
 
             // Handle expired links
             if (shortUrl.getExpiresAt() != null && shortUrl.getExpiresAt().isBefore(Instant.now())) {
