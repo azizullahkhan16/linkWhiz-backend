@@ -1,6 +1,8 @@
 package com.aktic.linkWhiz_backend.config;
 
+import com.aktic.linkWhiz_backend.constant.SecurityConstants;
 import com.aktic.linkWhiz_backend.filter.JwtAuthenticationFilter;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,19 +21,7 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
 @RequiredArgsConstructor
 @EnableMethodSecurity
 public class SecurityConfig {
-    private static final String[] WHITE_LIST_URL = {"/auth/**",
-            "/plan/**",
-            "/v2/api-docs",
-            "/v3/api-docs",
-            "/v3/api-docs/**",
-            "/swagger-resources",
-            "/swagger-resources/**",
-            "/configuration/ui",
-            "/configuration/security",
-            "/swagger-ui/**",
-            "/webjars/**",
-            "/swagger-ui.html"};
-
+    
     private final AuthenticationProvider authenticationProvider;
     private final JwtAuthenticationFilter jwtAuthFilter;
 
@@ -40,8 +30,9 @@ public class SecurityConfig {
 
         http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(req ->
-                        req.requestMatchers(WHITE_LIST_URL)
+                        req.requestMatchers(SecurityConstants.WHITE_LIST_URL)
                                 .permitAll()
+                                .requestMatchers(this::redirectUrl).permitAll()
                                 .requestMatchers("/user/**").hasAnyRole("USER", "ADMIN")
                                 .requestMatchers("/admin/**").hasRole("ADMIN")
                                 .anyRequest().authenticated()
@@ -51,5 +42,10 @@ public class SecurityConfig {
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 //                .logout(logout -> logout.addLogoutHandler(logoutHandler))
         return http.build();
+    }
+
+    private boolean redirectUrl(HttpServletRequest request) {
+        String requestURI = request.getServletPath();
+        return !requestURI.startsWith("/api");
     }
 }

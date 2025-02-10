@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/shortUrl")
+@RequestMapping("/api/shortUrl")
 @RequiredArgsConstructor
 public class ShortUrlController {
     private final ShortUrlService shortUrlService;

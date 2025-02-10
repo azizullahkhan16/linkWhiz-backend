@@ -1,5 +1,6 @@
 package com.aktic.linkWhiz_backend.filter;
 
+import com.aktic.linkWhiz_backend.constant.SecurityConstants;
 import com.aktic.linkWhiz_backend.service.jwt.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -28,8 +29,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(@NonNull HttpServletRequest request,
                                     @NonNull HttpServletResponse response,
                                     @NonNull FilterChain filterChain) throws ServletException, IOException {
-        System.out.println(request.getHeader("Authorization"));
-        if (request.getServletPath().contains("/auth")) {
+
+        for (String path : SecurityConstants.FILTER_BYPASS_PATHS) {
+            if (request.getServletPath().contains(path)) {
+                filterChain.doFilter(request, response);
+                return;
+            }
+        }
+
+        if (!request.getServletPath().startsWith("/api")) {
             filterChain.doFilter(request, response);
             return;
         }
