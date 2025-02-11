@@ -19,14 +19,6 @@ public interface ShortUrlRepository extends JpaRepository<ShortUrl, Long> {
 
     Optional<ShortUrl> findByIdAndUserId(Long id, Long userId);
 
-    Page<ShortUrl> findAllByUserId(Long userId, Pageable pageable);
-
-    Page<ShortUrl> findByUserIdAndCreatedAtAndExpiresAt(Long userId, Instant createdAt, Instant expiresAt, Pageable pageable);
-
-    Page<ShortUrl> findByUserIdAndCreatedAt(Long userId, Instant createdAt, Pageable pageable);
-
-    Page<ShortUrl> findByUserIdAndExpiresAt(Long userId, Instant expiresAt, Pageable pageable);
-
     Page<ShortUrl> findByUserId(Long userId, Pageable pageable);
 
     Page<ShortUrl> findByUserIdAndCreatedAtBetweenAndExpiresAtBetween(Long userId, Instant createdAtStart, Instant createdAtEnd, Instant expiresAtStart, Instant expiresAtEnd, Pageable pageable);
@@ -34,4 +26,6 @@ public interface ShortUrlRepository extends JpaRepository<ShortUrl, Long> {
     Page<ShortUrl> findByUserIdAndCreatedAtBetween(Long userId, Instant createdAtStart, Instant createdAtEnd, Pageable pageable);
 
     Page<ShortUrl> findByUserIdAndExpiresAtBetween(Long userId, Instant expiresAtStart, Instant expiresAtEnd, Pageable pageable);
+
+    boolean existsByIdAndUserId(Long shortUrlId, Long id);
 }

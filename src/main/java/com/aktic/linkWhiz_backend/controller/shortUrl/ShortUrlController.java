@@ -12,6 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.Instant;
+
 @RestController
 @RequestMapping("/api/shortUrl")
 @RequiredArgsConstructor
@@ -50,6 +52,19 @@ public class ShortUrlController {
                                                                             @RequestParam(required = false) String expiresAt
     ) {
         return shortUrlService.getShortUrls(pageNumber, limit, createdAt, expiresAt);
+    }
+
+    @PatchMapping("/updateShortUrl/{shortUrlId}")
+    public ResponseEntity<ApiResponse<ShortUrlResponse>> updateShortUrl(@PathVariable final Long shortUrlId,
+                                                                        @RequestParam(required = false) Instant expiresAt,
+                                                                        @RequestParam(required = false) String originalUrl,
+                                                                        @RequestParam(required = false) Boolean hasExpiry) {
+        return shortUrlService.updateShortUrl(shortUrlId, expiresAt, originalUrl, hasExpiry);
+    }
+
+    @DeleteMapping("/deleteShortUrl/{shortUrlId}")
+    public ResponseEntity<ApiResponse<String>> deleteShortUrl(@PathVariable final Long shortUrlId) {
+        return shortUrlService.deleteShortUrl(shortUrlId);
     }
 
 

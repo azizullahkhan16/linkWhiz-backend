@@ -13,9 +13,11 @@ import com.aktic.linkWhiz_backend.service.qrCode.QRCodeService;
 import com.aktic.linkWhiz_backend.util.ApiResponse;
 import com.aktic.linkWhiz_backend.util.SnowflakeIdGenerator;
 import com.aktic.linkWhiz_backend.util.ValidationCheck;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -302,5 +304,73 @@ public class ShortUrlService {
         }
     }
 
+
+    public ResponseEntity<ApiResponse<ShortUrlResponse>> updateShortUrl(
+            Long shortUrlId, Instant expiresAt, String originalUrl, Boolean hasExpiry) {
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            User user = (User) authentication.getPrincipal();
+
+            Optional<ShortUrl> shortUrlOptional = shortUrlRepository.findByIdAndUserId(shortUrlId, user.getId());
+            if (shortUrlOptional.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(new ApiResponse<>(false, "Short URL not found", null));
+            }
+
+            ShortUrl shortUrl = shortUrlOptional.get();
+
+            // Handle expiration logic
+            if (Boolean.FALSE.equals(hasExpiry)) { // Explicit check for false
+                shortUrl.setExpiresAt(null);
+            } else if (expiresAt != null) {
+                if (expiresAt.isBefore(Instant.now())) {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                            .body(new ApiResponse<>(false, "Expiration time must be in the future", null));
+                }
+                shortUrl.setExpiresAt(expiresAt);
+            }
+
+            // Update original URL if provided and not empty
+            if (originalUrl != null && !originalUrl.trim().isEmpty()) {
+                shortUrl.setOriginalUrl(originalUrl);
+            }
+
+            shortUrlRepository.save(shortUrl);
+
+            return ResponseEntity.ok(new ApiResponse<>(true, "Short URL updated successfully", new ShortUrlResponse(shortUrl)));
+        } catch (Exception e) {
+            log.error("Unexpected error occurred while updating short URL", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse<>(false, "Internal server error", null));
+        }
+    }
+
+    @Transactional
+    public ResponseEntity<ApiResponse<String>> deleteShortUrl(Long shortUrlId) {
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            User user = (User) authentication.getPrincipal();
+
+            boolean exists = shortUrlRepository.existsByIdAndUserId(shortUrlId, user.getId());
+            if (!exists) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(new ApiResponse<>(false, "Short URL not found", null));
+            }
+
+            shortUrlRepository.deleteById(shortUrlId);
+            shortUrlRepository.flush();
+
+            return ResponseEntity.ok(new ApiResponse<>(true, "Short URL deleted successfully", null));
+
+        } catch (DataIntegrityViolationException e) {
+            log.error("Data integrity violation while deleting short URL", e);
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(new ApiResponse<>(false, "Cannot delete due to database constraints", null));
+        } catch (Exception e) {
+            log.error("Unexpected error occurred while deleting short URL", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse<>(false, "Internal server error", null));
+        }
+    }
 
 }

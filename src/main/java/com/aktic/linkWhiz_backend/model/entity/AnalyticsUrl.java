@@ -26,7 +26,7 @@ public class AnalyticsUrl {
     @Column(name = "last_accessed_at", nullable = true)
     private Instant lastAccessedAt;
 
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne
     @JoinColumn(name = "short_url_id", nullable = false)
     private ShortUrl shortUrl;
 
