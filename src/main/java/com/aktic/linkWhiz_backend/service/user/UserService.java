@@ -1,7 +1,6 @@
 package com.aktic.linkWhiz_backend.service.user;
 
 import com.aktic.linkWhiz_backend.model.entity.User;
-import com.aktic.linkWhiz_backend.model.request.UpdateUserInfo;
 import com.aktic.linkWhiz_backend.model.response.UserInfo;
 import com.aktic.linkWhiz_backend.repository.UserRepository;
 import com.aktic.linkWhiz_backend.service.fileStorage.FileStorageService;
@@ -17,6 +16,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.nio.file.Files;
 import java.util.Optional;
@@ -29,7 +29,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final FileStorageService fileStorageService;
 
-    public ResponseEntity<ApiResponse<UserInfo>> updateProfile(UpdateUserInfo updateUserInfo) {
+    public ResponseEntity<ApiResponse<UserInfo>> updateProfile(String firstName, String lastName, MultipartFile image) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
@@ -43,15 +43,15 @@ public class UserService {
 
             User user = optionalUser.get();
 
-            if (updateUserInfo.getFirstName() != null) {
-                user.setFirstName(updateUserInfo.getFirstName());
+            if (firstName != null) {
+                user.setFirstName(firstName);
             }
-            if (updateUserInfo.getLastName() != null) {
-                user.setLastName(updateUserInfo.getLastName());
+            if (lastName != null) {
+                user.setLastName(lastName);
             }
-            if (updateUserInfo.getImage() != null) {
+            if (image != null) {
                 fileStorageService.delete(user.getImage());
-                user.setImage(fileStorageService.save(updateUserInfo.getImage()));
+                user.setImage(fileStorageService.save(image));
             }
 
             userRepository.save(user);

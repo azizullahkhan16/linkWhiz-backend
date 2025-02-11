@@ -30,4 +30,5 @@ public class ShortUrlResponse {
         this.updatedAt = shortUrl.getUpdatedAt().toString();
         this.qrCode = shortUrl.getQrCode();
     }
+
 }
