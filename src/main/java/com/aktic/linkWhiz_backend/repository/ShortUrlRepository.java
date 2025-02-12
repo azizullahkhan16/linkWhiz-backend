@@ -5,6 +5,8 @@ import com.aktic.linkWhiz_backend.model.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 
 import java.time.Instant;
 import java.util.Optional;
@@ -28,4 +30,10 @@ public interface ShortUrlRepository extends JpaRepository<ShortUrl, Long> {
     Page<ShortUrl> findByUserIdAndExpiresAtBetween(Long userId, Instant expiresAtStart, Instant expiresAtEnd, Pageable pageable);
 
     boolean existsByIdAndUserId(Long shortUrlId, Long id);
+
+    @Modifying
+    @Query("DELETE FROM ShortUrl s WHERE s.id = :shortUrlId")
+    void deleteShortUrl(Long shortUrlId);
+
+
 }

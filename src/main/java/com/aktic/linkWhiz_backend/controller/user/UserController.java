@@ -1,8 +1,10 @@
 package com.aktic.linkWhiz_backend.controller.user;
 
+import com.aktic.linkWhiz_backend.model.request.ChangePasswordRequest;
 import com.aktic.linkWhiz_backend.model.response.UserInfo;
 import com.aktic.linkWhiz_backend.service.user.UserService;
 import com.aktic.linkWhiz_backend.util.ApiResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
@@ -25,5 +27,10 @@ public class UserController {
     @GetMapping("/profileImage")
     public ResponseEntity<Resource> getProfileImage() {
         return userService.getProfileImage();
+    }
+
+    @PatchMapping("/updatePassword")
+    public ResponseEntity<ApiResponse<String>> updatePassword(@Valid @RequestBody ChangePasswordRequest changePasswordRequest) {
+        return userService.updatePassword(changePasswordRequest);
     }
 }

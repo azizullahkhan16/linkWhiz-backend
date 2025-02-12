@@ -1,4 +1,4 @@
-package com.aktic.linkWhiz_backend.model.request;
+package com.aktic.linkWhiz_backend.model.response;
 
 import com.aktic.linkWhiz_backend.model.entity.ShortUrl;
 import lombok.AllArgsConstructor;

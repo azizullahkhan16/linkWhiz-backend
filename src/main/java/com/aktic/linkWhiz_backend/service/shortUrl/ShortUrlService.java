@@ -4,7 +4,8 @@ import com.aktic.linkWhiz_backend.model.entity.AnalyticsUrl;
 import com.aktic.linkWhiz_backend.model.entity.ShortUrl;
 import com.aktic.linkWhiz_backend.model.entity.User;
 import com.aktic.linkWhiz_backend.model.request.ShortUrlRequest;
-import com.aktic.linkWhiz_backend.model.request.ShortUrlResponse;
+import com.aktic.linkWhiz_backend.model.response.AnalyticsUrlResponse;
+import com.aktic.linkWhiz_backend.model.response.ShortUrlResponse;
 import com.aktic.linkWhiz_backend.repository.AnalyticsUrlRepository;
 import com.aktic.linkWhiz_backend.repository.ShortUrlRepository;
 import com.aktic.linkWhiz_backend.service.fileStorage.FileStorageService;
@@ -13,7 +14,6 @@ import com.aktic.linkWhiz_backend.service.qrCode.QRCodeService;
 import com.aktic.linkWhiz_backend.util.ApiResponse;
 import com.aktic.linkWhiz_backend.util.SnowflakeIdGenerator;
 import com.aktic.linkWhiz_backend.util.ValidationCheck;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
@@ -29,6 +29,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -44,6 +45,7 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@Transactional
 public class ShortUrlService {
     private final ShortUrlRepository shortUrlRepository;
     private final HashingService hashingService;
@@ -345,7 +347,6 @@ public class ShortUrlService {
         }
     }
 
-    @Transactional
     public ResponseEntity<ApiResponse<String>> deleteShortUrl(Long shortUrlId) {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -357,8 +358,7 @@ public class ShortUrlService {
                         .body(new ApiResponse<>(false, "Short URL not found", null));
             }
 
-            shortUrlRepository.deleteById(shortUrlId);
-            shortUrlRepository.flush();
+            shortUrlRepository.deleteShortUrl(shortUrlId);
 
             return ResponseEntity.ok(new ApiResponse<>(true, "Short URL deleted successfully", null));
 
@@ -373,4 +373,29 @@ public class ShortUrlService {
         }
     }
 
+    public ResponseEntity<ApiResponse<AnalyticsUrlResponse>> getAnalytics(Long shortUrlId) {
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            User user = (User) authentication.getPrincipal();
+
+            Optional<ShortUrl> shortUrlOptional = shortUrlRepository.findByIdAndUserId(shortUrlId, user.getId());
+            if (shortUrlOptional.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(new ApiResponse<>(false, "Short URL not found", null));
+            }
+
+            Optional<AnalyticsUrl> analyticsUrlOptional = analyticsUrlRepository.findByShortUrlId(shortUrlId);
+            if (analyticsUrlOptional.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(new ApiResponse<>(false, "Analytics not found", null));
+            }
+
+            return ResponseEntity.ok(new ApiResponse<>(true, "Analytics retrieved successfully", new AnalyticsUrlResponse(analyticsUrlOptional.get())));
+
+        } catch (Exception e) {
+            log.error("Unexpected error occurred while getting analytics", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse<>(false, "Internal server error", null));
+        }
+    }
 }

@@ -1,7 +1,8 @@
 package com.aktic.linkWhiz_backend.controller.shortUrl;
 
 import com.aktic.linkWhiz_backend.model.request.ShortUrlRequest;
-import com.aktic.linkWhiz_backend.model.request.ShortUrlResponse;
+import com.aktic.linkWhiz_backend.model.response.AnalyticsUrlResponse;
+import com.aktic.linkWhiz_backend.model.response.ShortUrlResponse;
 import com.aktic.linkWhiz_backend.service.shortUrl.ShortUrlService;
 import com.aktic.linkWhiz_backend.util.ApiResponse;
 import jakarta.validation.Valid;
@@ -65,6 +66,11 @@ public class ShortUrlController {
     @DeleteMapping("/deleteShortUrl/{shortUrlId}")
     public ResponseEntity<ApiResponse<String>> deleteShortUrl(@PathVariable final Long shortUrlId) {
         return shortUrlService.deleteShortUrl(shortUrlId);
+    }
+
+    @GetMapping("/getAnalytics/{shortUrlId}")
+    public ResponseEntity<ApiResponse<AnalyticsUrlResponse>> getAnalytics(@PathVariable final Long shortUrlId) {
+        return shortUrlService.getAnalytics(shortUrlId);
     }
 
 

@@ -30,7 +30,7 @@ public class LinkWhizBackendApplication implements CommandLineRunner {
     public void run(String... arg) throws Exception {
         storageService.init();
     }
-
+//
 //    @Bean
 //    CommandLineRunner insertRoles() {
 //        return args -> {

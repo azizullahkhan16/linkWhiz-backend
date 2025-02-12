@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.math.BigInteger;
 import java.time.Instant;
@@ -28,6 +30,7 @@ public class AnalyticsUrl {
 
     @OneToOne
     @JoinColumn(name = "short_url_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private ShortUrl shortUrl;
 
     @PrePersist

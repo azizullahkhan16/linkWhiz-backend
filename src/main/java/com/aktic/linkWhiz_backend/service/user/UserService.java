@@ -1,6 +1,7 @@
 package com.aktic.linkWhiz_backend.service.user;
 
 import com.aktic.linkWhiz_backend.model.entity.User;
+import com.aktic.linkWhiz_backend.model.request.ChangePasswordRequest;
 import com.aktic.linkWhiz_backend.model.response.UserInfo;
 import com.aktic.linkWhiz_backend.repository.UserRepository;
 import com.aktic.linkWhiz_backend.service.fileStorage.FileStorageService;
@@ -15,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -28,6 +30,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final FileStorageService fileStorageService;
+    private final PasswordEncoder passwordEncoder;
 
     public ResponseEntity<ApiResponse<UserInfo>> updateProfile(String firstName, String lastName, MultipartFile image) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -99,6 +102,35 @@ public class UserService {
             log.error("Unexpected error occurred while getting profile image", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 
+        }
+    }
+
+    public ResponseEntity<ApiResponse<String>> updatePassword(ChangePasswordRequest changePasswordRequest) {
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            User user = (User) authentication.getPrincipal();
+
+            if (changePasswordRequest.getOldPassword().equals(changePasswordRequest.getNewPassword())) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(new ApiResponse<>(false, "New password cannot be the same as the old password", null));
+            }
+
+            if (!passwordEncoder.matches(changePasswordRequest.getOldPassword(), user.getPassword())) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(new ApiResponse<>(false, "Invalid old password", null));
+            }
+
+            user.setPassword(passwordEncoder.encode(changePasswordRequest.getNewPassword()));
+
+            userRepository.save(user);
+
+            return ResponseEntity.ok(new ApiResponse<>(true, "Password updated successfully", null));
+
+
+        } catch (Exception e) {
+            log.error("Unexpected error occurred while updating password", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse<>(false, "Internal server error", null));
         }
     }
 }
