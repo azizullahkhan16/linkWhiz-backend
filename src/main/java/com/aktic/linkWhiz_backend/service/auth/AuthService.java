@@ -3,6 +3,7 @@ package com.aktic.linkWhiz_backend.service.auth;
 import com.aktic.linkWhiz_backend.model.entity.Plan;
 import com.aktic.linkWhiz_backend.model.entity.Role;
 import com.aktic.linkWhiz_backend.model.entity.User;
+import com.aktic.linkWhiz_backend.model.enums.AuthProvider;
 import com.aktic.linkWhiz_backend.model.request.AuthenticationRequest;
 import com.aktic.linkWhiz_backend.model.request.RegisterRequest;
 import com.aktic.linkWhiz_backend.model.response.AuthenticationResponse;
@@ -10,6 +11,7 @@ import com.aktic.linkWhiz_backend.model.response.UserInfo;
 import com.aktic.linkWhiz_backend.repository.PlanRepository;
 import com.aktic.linkWhiz_backend.repository.RoleRepository;
 import com.aktic.linkWhiz_backend.repository.UserRepository;
+import com.aktic.linkWhiz_backend.security.oauth2.OAuth2UserInfo;
 import com.aktic.linkWhiz_backend.service.jwt.JwtService;
 import com.aktic.linkWhiz_backend.util.ApiResponse;
 import com.aktic.linkWhiz_backend.util.SnowflakeIdGenerator;
@@ -22,6 +24,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -48,6 +51,9 @@ public class AuthService {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, "Email is already in use", null));
             }
             Role userRole = roleRepository.findByRoleName("USER");
+            if (userRole == null) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, "Role not found", null));
+            }
             User user = User.builder()
                     .id(idGenerator.nextId())
                     .firstName(request.getFirstName())
@@ -88,7 +94,7 @@ public class AuthService {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                         .body(new ApiResponse<>(false, "Invalid password", null));
             }
-            String token = jwtService.generateToken(user);
+            String token = jwtService.generateToken(user.getEmail());
             UserInfo userInfo = new UserInfo(user);
 
             return ResponseEntity.ok(new ApiResponse<>(true, "User logged in successfully",
@@ -100,4 +106,46 @@ public class AuthService {
                     .body(new ApiResponse<>(false, "Internal server error", null));
         }
     }
+
+    @Transactional
+    public User registerOauth2User(String provider, OAuth2UserInfo oAuth2UserInfo) {
+        try {
+            Optional<Plan> plan = planRepository.findByPlanName("Free");
+            if (plan.isEmpty()) {
+                throw new Exception("Plan not found");
+            }
+            Role userRole = roleRepository.findByRoleName("USER");
+            if (userRole == null) {
+                throw new Exception("Role not found");
+            }
+            User user = User.builder()
+                    .id(idGenerator.nextId())
+                    .firstName(oAuth2UserInfo.getFirstName())
+                    .lastName(oAuth2UserInfo.getLastName())
+                    .email(oAuth2UserInfo.getEmail())
+                    .plan(plan.get())
+                    .role(userRole)
+                    .build();
+
+            user.setProvider(AuthProvider.valueOf(provider.toUpperCase()));
+            return userRepository.save(user);
+        } catch (Exception e) {
+            log.error("Error occurred while registering user", e);
+            return null;
+        }
+    }
+
+    @Transactional
+    public User updateOauth2User(User user, String provider, OAuth2UserInfo oAuth2UserInfo) {
+        try {
+            user.setFirstName(oAuth2UserInfo.getFirstName());
+            user.setLastName(oAuth2UserInfo.getLastName());
+            user.setProvider(AuthProvider.valueOf(provider.toUpperCase()));
+            return userRepository.save(user);
+        } catch (Exception e) {
+            log.error("Error occurred while updating user", e);
+            return null;
+        }
+    }
+
 }
