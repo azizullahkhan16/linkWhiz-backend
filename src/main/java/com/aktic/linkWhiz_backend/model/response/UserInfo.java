@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class UserInfo {
+    private Long id;
     private String firstName;
     private String lastName;
     private String email;
@@ -21,8 +22,11 @@ public class UserInfo {
     private String createdAt;
     private String updatedAt;
     private Plan plan;
+    private String role;
+    private String provider;
 
     public UserInfo(User user) {
+        this.id = user.getId();
         this.firstName = user.getFirstName();
         this.lastName = user.getLastName();
         this.email = user.getEmail();
@@ -32,5 +36,6 @@ public class UserInfo {
         this.createdAt = user.getCreatedAt().toString();
         this.updatedAt = user.getUpdatedAt().toString();
         this.plan = user.getPlan();
+        this.role = user.getRole().getRoleName();
     }
 }

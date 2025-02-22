@@ -125,9 +125,10 @@ public class AuthService {
                     .email(oAuth2UserInfo.getEmail())
                     .plan(plan.get())
                     .role(userRole)
+                    .provider(AuthProvider.valueOf(provider.toUpperCase()))
                     .build();
 
-            user.setProvider(AuthProvider.valueOf(provider.toUpperCase()));
+            log.info("User registered successfully: {}", user);
             return userRepository.save(user);
         } catch (Exception e) {
             log.error("Error occurred while registering user", e);
@@ -141,6 +142,7 @@ public class AuthService {
             user.setFirstName(oAuth2UserInfo.getFirstName());
             user.setLastName(oAuth2UserInfo.getLastName());
             user.setProvider(AuthProvider.valueOf(provider.toUpperCase()));
+            log.info("User registered successfully: {}", user);
             return userRepository.save(user);
         } catch (Exception e) {
             log.error("Error occurred while updating user", e);
