@@ -8,6 +8,7 @@ import com.aktic.linkWhiz_backend.model.response.AnalyticsUrlResponse;
 import com.aktic.linkWhiz_backend.model.response.ShortUrlResponse;
 import com.aktic.linkWhiz_backend.repository.AnalyticsUrlRepository;
 import com.aktic.linkWhiz_backend.repository.ShortUrlRepository;
+import com.aktic.linkWhiz_backend.service.auth.AuthService;
 import com.aktic.linkWhiz_backend.service.fileStorage.FileStorageService;
 import com.aktic.linkWhiz_backend.service.hashing.HashingService;
 import com.aktic.linkWhiz_backend.service.qrCode.QRCodeService;
@@ -26,8 +27,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -54,12 +53,12 @@ public class ShortUrlService {
     private final QRCodeService qrCodeService;
     private final ValidationCheck validationCheck;
     private final FileStorageService fileStorageService;
+    private final AuthService authService;
 
     public ResponseEntity<ApiResponse<ShortUrlResponse>> shortenUrl(ShortUrlRequest shortUrlRequest) {
         try {
             // Get authenticated user directly
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            User user = (User) authentication.getPrincipal();
+            User user = authService.getCurrentUser();
 
             // Check if user already shortened this URL
             Optional<ShortUrl> existingShortUrl = shortUrlRepository.findByOriginalUrlAndUser(shortUrlRequest.getOriginalUrl(), user);
@@ -128,8 +127,7 @@ public class ShortUrlService {
     public ResponseEntity<ApiResponse<ShortUrlResponse>> generateQRCode(Long shortUrlId, MultipartFile image, Integer _width, Integer _height, String _onColor, String _offColor) {
         try {
             // Get authenticated user directly
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            User user = (User) authentication.getPrincipal();
+            User user = authService.getCurrentUser();
 
             Optional<ShortUrl> shortUrlOptional = shortUrlRepository.findByIdAndUserId(shortUrlId, user.getId());
             if (shortUrlOptional.isEmpty()) {
@@ -184,8 +182,7 @@ public class ShortUrlService {
     public ResponseEntity<Resource> getQRCode(Long urlId) {
         try {
             // Get authenticated user directly
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            User user = (User) authentication.getPrincipal();
+            User user = authService.getCurrentUser();
 
             Optional<ShortUrl> shortUrlOptional = shortUrlRepository.findByIdAndUserId(urlId, user.getId());
             if (shortUrlOptional.isEmpty()) {
@@ -223,8 +220,7 @@ public class ShortUrlService {
     public ResponseEntity<ApiResponse<ShortUrlResponse>> getShortUrl(Long shortUrlId) {
         try {
             // Get authenticated user directly
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            User user = (User) authentication.getPrincipal();
+            User user = authService.getCurrentUser();
 
             Optional<ShortUrl> shortUrlOptional = shortUrlRepository.findByIdAndUserId(shortUrlId, user.getId());
             if (shortUrlOptional.isEmpty()) {
@@ -245,8 +241,7 @@ public class ShortUrlService {
             Integer pageNumber, Integer limit, String createdAt, String expiresAt) {
         try {
             // Get authenticated user directly
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            User user = (User) authentication.getPrincipal();
+            User user = authService.getCurrentUser();
             Long userId = user.getId();
 
             int page = (pageNumber != null && pageNumber > 0) ? pageNumber : 0; // Page index starts at 0
@@ -310,8 +305,7 @@ public class ShortUrlService {
     public ResponseEntity<ApiResponse<ShortUrlResponse>> updateShortUrl(
             Long shortUrlId, Instant expiresAt, String originalUrl, Boolean hasExpiry) {
         try {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            User user = (User) authentication.getPrincipal();
+            User user = authService.getCurrentUser();
 
             Optional<ShortUrl> shortUrlOptional = shortUrlRepository.findByIdAndUserId(shortUrlId, user.getId());
             if (shortUrlOptional.isEmpty()) {
@@ -349,8 +343,7 @@ public class ShortUrlService {
 
     public ResponseEntity<ApiResponse<String>> deleteShortUrl(Long shortUrlId) {
         try {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            User user = (User) authentication.getPrincipal();
+            User user = authService.getCurrentUser();
 
             boolean exists = shortUrlRepository.existsByIdAndUserId(shortUrlId, user.getId());
             if (!exists) {
@@ -375,8 +368,7 @@ public class ShortUrlService {
 
     public ResponseEntity<ApiResponse<AnalyticsUrlResponse>> getAnalytics(Long shortUrlId) {
         try {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            User user = (User) authentication.getPrincipal();
+            User user = authService.getCurrentUser();
 
             Optional<ShortUrl> shortUrlOptional = shortUrlRepository.findByIdAndUserId(shortUrlId, user.getId());
             if (shortUrlOptional.isEmpty()) {

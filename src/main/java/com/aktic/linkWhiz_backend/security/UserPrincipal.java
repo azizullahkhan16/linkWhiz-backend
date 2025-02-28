@@ -15,16 +15,14 @@ import java.util.Map;
 @Data
 public class UserPrincipal implements UserDetails, OAuth2User {
 
-    private final Long id;
-    private final String email;
-    private final String password;
+    private final User user;
     private final Collection<? extends GrantedAuthority> authorities;
     private Map<String, Object> attributes;
 
     public static UserPrincipal create(User user) {
         String userRole = user.getRole().getRoleName();
         List<GrantedAuthority> authorities = Collections.singletonList(new SimpleGrantedAuthority(userRole));
-        return new UserPrincipal(user.getId(), user.getEmail(), user.getPassword(), authorities);
+        return new UserPrincipal(user, authorities);
     }
 
     public static UserPrincipal create(User user, Map<String, Object> attributes) {
@@ -40,7 +38,7 @@ public class UserPrincipal implements UserDetails, OAuth2User {
 
     @Override
     public String getName() {
-        return email;
+        return user.getEmail();
     }
 
     @Override
@@ -50,12 +48,12 @@ public class UserPrincipal implements UserDetails, OAuth2User {
 
     @Override
     public String getPassword() {
-        return password;
+        return this.user.getPassword();
     }
 
     @Override
     public String getUsername() {
-        return email;
+        return this.user.getEmail();
     }
 
     @Override

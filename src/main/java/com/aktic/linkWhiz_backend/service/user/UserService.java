@@ -4,6 +4,7 @@ import com.aktic.linkWhiz_backend.model.entity.User;
 import com.aktic.linkWhiz_backend.model.request.ChangePasswordRequest;
 import com.aktic.linkWhiz_backend.model.response.UserInfo;
 import com.aktic.linkWhiz_backend.repository.UserRepository;
+import com.aktic.linkWhiz_backend.service.auth.AuthService;
 import com.aktic.linkWhiz_backend.service.fileStorage.FileStorageService;
 import com.aktic.linkWhiz_backend.util.ApiResponse;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +23,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.nio.file.Files;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -32,20 +32,15 @@ public class UserService {
     private final UserRepository userRepository;
     private final FileStorageService fileStorageService;
     private final PasswordEncoder passwordEncoder;
+    private final AuthService authService;
 
     public ResponseEntity<ApiResponse<UserInfo>> updateProfile(String firstName, String lastName, MultipartFile image) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
         try {
-            Optional<User> optionalUser = userRepository.findByEmail(userDetails.getUsername());
-
-            if (optionalUser.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(new ApiResponse<>(false, "User not found", null));
-            }
-
-            User user = optionalUser.get();
+            User user = userRepository.findByEmail(userDetails.getUsername())
+                    .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
             if (firstName != null) {
                 user.setFirstName(firstName);
@@ -54,7 +49,7 @@ public class UserService {
                 user.setLastName(lastName);
             }
             if (image != null) {
-                fileStorageService.delete(user.getImage());
+                if (user.getImage() != null) fileStorageService.delete(user.getImage());
                 user.setImage(fileStorageService.save(image));
             }
 
@@ -71,16 +66,7 @@ public class UserService {
 
     public ResponseEntity<Resource> getProfileImage() {
         try {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-
-            Optional<User> optionalUser = userRepository.findByEmail(userDetails.getUsername());
-
-            if (optionalUser.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-            }
-
-            User user = optionalUser.get();
+            User user = authService.getCurrentUser();
 
             Resource resource = fileStorageService.load(user.getImage());
             if (resource == null || !resource.exists()) {
@@ -108,8 +94,7 @@ public class UserService {
 
     public ResponseEntity<ApiResponse<String>> updatePassword(ChangePasswordRequest changePasswordRequest) {
         try {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            User user = (User) authentication.getPrincipal();
+            User user = authService.getCurrentUser();
 
             if (changePasswordRequest.getOldPassword().equals(changePasswordRequest.getNewPassword())) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
