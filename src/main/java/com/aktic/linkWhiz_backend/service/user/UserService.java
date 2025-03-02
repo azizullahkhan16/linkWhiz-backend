@@ -14,9 +14,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -35,12 +32,8 @@ public class UserService {
     private final AuthService authService;
 
     public ResponseEntity<ApiResponse<UserInfo>> updateProfile(String firstName, String lastName, MultipartFile image) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-
         try {
-            User user = userRepository.findByEmail(userDetails.getUsername())
-                    .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+            User user = authService.getCurrentUser();
 
             if (firstName != null) {
                 user.setFirstName(firstName);

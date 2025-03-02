@@ -68,6 +68,7 @@ public class OAuthService {
             String email = (String) userInfo.get("email");
             String firstName = (String) userInfo.get("given_name");
             String lastName = (String) userInfo.get("family_name");
+            String userImage = (String) userInfo.get("picture");
 
             // Check if user exists or create a new user
             Optional<User> optionalUser = userRepository.findByEmail(email);
@@ -75,6 +76,9 @@ public class OAuthService {
 
             if (optionalUser.isPresent()) {
                 user = optionalUser.get();
+                user.setFirstName(firstName);
+                user.setLastName(lastName);
+                user.setImage(userImage);
             } else {
                 Role userRole = roleRepository.findByRoleName("USER");
                 if (userRole == null) {
@@ -93,12 +97,14 @@ public class OAuthService {
                         .firstName(firstName)
                         .lastName(lastName)
                         .email(email)
+                        .image(userImage)
                         .plan(plan.get())
                         .role(userRole)
                         .provider(AuthProvider.valueOf(provider.toUpperCase()))
                         .build();
-                userRepository.save(user);
             }
+
+            user = userRepository.save(user);
 
             // Generate JWT Token
             String token = jwtService.generateToken(user.getEmail());
@@ -113,6 +119,8 @@ public class OAuthService {
                     .isActive(user.getIsActive())
                     .isVerified(user.getIsVerified())
                     .provider(user.getProvider().name())
+                    .createdAt(user.getCreatedAt())
+                    .updatedAt(user.getUpdatedAt())
                     .build();
 
             return ResponseEntity.ok(new ApiResponse<>(true, "OAuth login successful",
