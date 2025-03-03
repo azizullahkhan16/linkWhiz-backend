@@ -11,6 +11,7 @@ import com.aktic.linkWhiz_backend.model.response.UserInfo;
 import com.aktic.linkWhiz_backend.repository.PlanRepository;
 import com.aktic.linkWhiz_backend.repository.RoleRepository;
 import com.aktic.linkWhiz_backend.repository.UserRepository;
+import com.aktic.linkWhiz_backend.security.UserPrincipal;
 import com.aktic.linkWhiz_backend.security.oauth2.OAuth2UserInfo;
 import com.aktic.linkWhiz_backend.service.jwt.JwtService;
 import com.aktic.linkWhiz_backend.util.ApiResponse;
@@ -22,6 +23,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -125,9 +127,10 @@ public class AuthService {
                     .email(oAuth2UserInfo.getEmail())
                     .plan(plan.get())
                     .role(userRole)
+                    .provider(AuthProvider.valueOf(provider.toUpperCase()))
                     .build();
 
-            user.setProvider(AuthProvider.valueOf(provider.toUpperCase()));
+            log.info("User registered successfully: {}", user);
             return userRepository.save(user);
         } catch (Exception e) {
             log.error("Error occurred while registering user", e);
@@ -141,9 +144,20 @@ public class AuthService {
             user.setFirstName(oAuth2UserInfo.getFirstName());
             user.setLastName(oAuth2UserInfo.getLastName());
             user.setProvider(AuthProvider.valueOf(provider.toUpperCase()));
+            log.info("User registered successfully: {}", user);
             return userRepository.save(user);
         } catch (Exception e) {
             log.error("Error occurred while updating user", e);
+            return null;
+        }
+    }
+
+    public User getCurrentUser() {
+        try {
+            UserPrincipal userPrincipal = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            return userPrincipal.getUser();
+        } catch (Exception e) {
+            log.error("Error occurred while getting current user", e);
             return null;
         }
     }
