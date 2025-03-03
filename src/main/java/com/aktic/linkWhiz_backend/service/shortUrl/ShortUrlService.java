@@ -66,6 +66,12 @@ public class ShortUrlService {
                 return ResponseEntity.ok(new ApiResponse<>(true, "Shortened URL retrieved successfully", new ShortUrlResponse(existingShortUrl.get())));
             }
 
+            // Check the current plan of the user and compare the number of shortened urls
+            if (shortUrlRepository.countByUserId(user.getId()).compareTo(user.getPlan().getMaxLinks()) >= 0) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body(new ApiResponse<>(false, "You have reached the maximum number of shortened URLs", null));
+            }
+
             // Validate expiresAt: Must be in the future and converted to UTC
             Instant nowUtc = Instant.now();
             Instant expiresAtUtc = shortUrlRequest.getExpiresAt() != null
