@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
+import java.math.BigInteger;
 import java.time.Instant;
 import java.util.Optional;
 
@@ -35,5 +36,5 @@ public interface ShortUrlRepository extends JpaRepository<ShortUrl, Long> {
     @Query("DELETE FROM ShortUrl s WHERE s.id = :shortUrlId")
     void deleteShortUrl(Long shortUrlId);
 
-
+    BigInteger countByUserId(Long id);
 }
