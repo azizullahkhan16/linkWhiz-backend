@@ -1,4 +1,4 @@
-# LinkWhiz - URL shortening service
+# LinkWhiz - URL Shortener Service
 
 A robust and scalable URL shortening service built with Spring Boot, providing secure authentication, analytics tracking, and QR code generation capabilities.
 
